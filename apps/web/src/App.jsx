@@ -17,20 +17,19 @@ export default function App() {
   const { time, pulse }           = useClock();
   const activity                  = useActivityFeed();
 
-  //  Theme State Logic 
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("rhis-theme");
       if (savedTheme) return savedTheme;
 
-      // Fallback to system OS preferences if no history exists
+
       const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       return systemPrefersDark ? "dark" : "light";
     }
     return "light";
   });
 
-  // Sync the current theme state to the DOM and local storage
+  
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("rhis-theme", theme);
@@ -38,7 +37,7 @@ export default function App() {
 
   const critCount = HAZARDS.filter(h => h.sev === "Critical").length;
 
-  // Added theme and setTheme into sharedProps so your pages/components can access them if needed
+  
   const sharedProps = { activity, selectedId, setSelectedId, theme, setTheme };
 
   return (
@@ -51,17 +50,17 @@ export default function App() {
       color: "var(--rhis-text-main)",
       transition: "background 0.3s ease, color 0.3s ease"
     }}>
-      {/*  Sidebar  */}
+      
       <Sidebar page={page} setPage={setPage} time={time} pulse={pulse} critCount={critCount} />
 
-      {/*  Main column  */}
+
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-        {/* Top bar (Pass theme state variables here so you can place the toggle buttons inside it) */}
+        
         <TopBar page={page} setPage={setPage} critCount={critCount} theme={theme} setTheme={setTheme} />
 
-        {/* Page content */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px 18px" }}>
+       
+        <div className="rhis-page-content" style={{ flex: 1, overflowY: "auto", padding: "16px 18px", background: "var(--rhis-bg-main)" }}>
           {page === "overview"  && <PageOverview  {...sharedProps} />}
           {page === "map"       && <PageMap       {...sharedProps} />}
           {page === "incidents" && <PageIncidents {...sharedProps} />}
@@ -70,7 +69,7 @@ export default function App() {
           {page === "settings"  && <PageSettings  {...sharedProps} />}
         </div>
 
-        {/* Status bar */}
+       
         <div style={{
           background: "var(--rhis-bg-surface)", 
           borderTop: "1px solid var(--rhis-border)",
@@ -92,7 +91,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Global CSS Variables Configuration & Animations */}
+  
       <style>{`
         /* ── Bright/Light Theme Values ── */
         :root {
@@ -110,6 +109,42 @@ export default function App() {
           --rhis-text-main: #f8fafc;
           --rhis-text-muted: #64748b;
           --rhis-border: #334155;
+        }
+
+        /* ── Core Theme Interceptor Engine ── */
+        /* If dark mode is active, override stubborn elements with internal hardcoded background parameters */
+        [data-theme="dark"] aside,
+        [data-theme="dark"] nav,
+        [data-theme="dark"] .sidebar, 
+        [data-theme="dark"] .sidebar-container,
+        [data-theme="dark"] [style*="background: #fff"],
+        [data-theme="dark"] [style*="background: #ffffff"],
+        [data-theme="dark"] [style*="background-color: #fff"],
+        [data-theme="dark"] [style*="background-color: #ffffff"],
+        [data-theme="dark"] [style*="background: rgb(255, 255, 255)"],
+        [data-theme="dark"] [style*="background-color: rgb(255, 255, 255)"] {
+          background: var(--rhis-bg-surface) !important;
+          background-color: var(--rhis-bg-surface) !important;
+          color: var(--rhis-text-main) !important;
+          border-color: var(--rhis-border) !important;
+        }
+
+        /* Catch any sub-panels using the main light grey layout backgrounds */
+        [data-theme="dark"] [style*="background: #f2f5fb"],
+        [data-theme="dark"] [style*="background-color: #f2f5fb"],
+        [data-theme="dark"] [style*="background: rgb(242, 245, 251)"],
+        [data-theme="dark"] [style*="background-color: rgb(242, 245, 251)"] {
+          background: var(--rhis-bg-main) !important;
+          background-color: var(--rhis-bg-main) !important;
+        }
+
+        /* Ensure all text nodes in cards or lists remain visible */
+        [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] p {
+          color: var(--rhis-text-main) !important;
+        }
+        
+        [data-theme="dark"] span, [data-theme="dark"] label {
+          color: var(--rhis-text-main);
         }
 
         @keyframes rhisBounce {
